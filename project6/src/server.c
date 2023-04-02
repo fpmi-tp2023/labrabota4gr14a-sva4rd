@@ -18,7 +18,7 @@ void enter_str(char *sql, char *name, int column);
 void insert_query(char *sql);
 void delete_query(char *sql);
 void select_photo(char *sql, sqlite3 *db, int mode);
-void insert_photo(char *sql, sqlite3 *db);
+void insert_photo(char *sql, sqlite3 *db, int mode);
 
 
 static int callback(void *data, int argc, char **argv, char **azColName){
@@ -203,7 +203,7 @@ void select_photo(char *sql, sqlite3 *db, int mode){
     free(ph_sql);
 }
 
-void insert_photo(char *sql, sqlite3 *db){
+void insert_photo(char *sql, sqlite3 *db, int mode){
     printf("Enter filename(pattern: file.jpg): ");
     char *filename = malloc(50 * sizeof(char));
     char *file = malloc(50 * sizeof(char));
@@ -263,7 +263,10 @@ void insert_photo(char *sql, sqlite3 *db){
     
     sqlite3_stmt *pStmt;
     char *temp_sql = malloc(800 * sizeof(char));
-    strcpy(temp_sql, sql+19);
+    if (mode == 2)
+        strcpy(temp_sql, sql+19);
+    else
+        strcpy(temp_sql, sql);
     int rc = sqlite3_prepare(db, temp_sql, -1, &pStmt, 0);
     free(temp_sql);
     if (rc != SQLITE_OK) {
@@ -325,7 +328,7 @@ int do_sql_query(sqlite3 *data_base) {
                 insert_query(sql);
                 if (mode == 2)  //transaction
                     strcat(sql, commands[COMMIT]);
-                insert_photo(sql, data_base);
+                insert_photo(sql, data_base, mode);
                 break;
             case(3):
                 delete_query(sql);
